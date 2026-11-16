@@ -66,7 +66,7 @@ Python 重制版以当前 C# 恢复源码和实际运行结果作为行为参考
 ## 4. 代码结构
 
 ```text
-.python_port/
+python_port/
   app_qt.py       PySide6 主窗口、文件列表、编辑器和所有对话框
   core.py         标签读写、在线搜索、歌词解析、日志和匹配算法
   test_core.py    provider、歌词、标签和 HTTP 日志测试
