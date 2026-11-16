@@ -1,143 +1,58 @@
-MusicTag Python 重制版说明
+# MusicTag Python
 
-> 状态：可运行的功能重制版，不是原 WinForms 程序的逐字节复刻。
->
-> 行为参考：[leafxdd/musictag-recovered](https://github.com/leafxdd/musictag-recovered)
->
-> 本地参考实现：仓库中的 `src/MusicTag/` C# 恢复源码
+This is a lightweight Python port of the core MusicTag workflow:
 
-## 1. 定位
+- read and edit common audio tags
+- edit embedded lyrics manually or import an `.lrc` file
+- preview and replace cover images
+- search lyrics from NetEase Cloud Music or QQ Music
+- automatically match and write lyrics for selected files
+- batch apply changed editor values to multiple selected files
 
-Python 重制版以当前 C# 恢复源码和实际运行结果作为行为参考，重建音乐标签工具的核心工作流：
+The UI is intentionally independent of the WinForms layout.
 
-- 打开本地音频文件或目录
-- 读取、编辑并保存音频标签
-- 编辑内嵌歌词，或导入 `.lrc` / `.txt`
-- 预览、替换和移除封面
-- 从网易云音乐、QQ 音乐搜索歌词
-- 自动匹配歌词并写入标签
-- 通过“组合标签”搜索候选歌曲，按覆盖选项把候选字段应用到编辑器
-- 批量读取、过滤和多选保存
+Combined tag search mirrors the original workflow: search candidates by
+title/artist, inspect tags, lyrics and cover, then apply selected fields to
+the editor. Overwrite choices are saved in `combined_tag_settings.json`.
 
-界面使用 PySide6 重新设计，不要求与原 WinForms 界面像素一致。目标是功能对齐、操作可理解、数据行为可验证，而不是复刻设计器布局。
+## Requirements
 
-## 2. 与参考仓库的关系
+- Windows 10 or newer
+- Python 3.11 or newer
+- `mutagen` for tag I/O
+- `Pillow` for cover preview
+- `PySide6` for the desktop UI
 
-参考仓库中的 C# 项目仍是原程序行为、在线接口、歌词解析和标签写回逻辑的主要依据。Python 版本遵循相同的概念分层：
+The repository environment was created with Python 3.13.
 
-```text
-打开文件
-  -> 读取标签/歌词/封面
-  -> 编辑或在线搜索
-  -> 组合标签/歌词应用
-  -> 用户确认保存
-  -> mutagen 写入音频文件
+## Install
+
+```powershell
+py -m venv .\.python_port\.venv
+.\.python_port\.venv\Scripts\python.exe -m pip install -r .\.python_port\requirements.txt
 ```
 
-两者不是逐行一一对应：
+## Run
 
-- C# 版使用 WinForms、TagLibSharp、SQLite 历史和完整的多源 provider。
-- Python 版使用 PySide6、mutagen、线程池和两个当前维护的在线来源。
-- Python 版优先保证核心功能可用，暂未复制 WinForms 的 DPI、虚拟列表和全部历史机制。
-
-## 3. 功能对照
-
-| 功能 | 当前 C# 恢复版 | Python 重制版 | 说明 |
-| --- | --- | --- | --- |
-| 音频标签读取/写入 | 支持 | 支持 | Python 使用 mutagen |
-| MP3 / FLAC / M4A / OGG / WAV / AIFF / WMA | 支持 | 支持常见写入路径 | 具体格式能力受 mutagen 限制 |
-| 标题、艺术家、专辑、年份、音轨、碟号、风格、作曲、作词、注释 | 支持 | 支持 | 编辑器字段独立于控件布局 |
-| 内嵌歌词编辑 | 支持 | 支持 | 支持多行文本和 LRC 导入 |
-| 封面预览/替换/移除 | 支持 | 支持 | 使用 Pillow 处理预览 |
-| 网易云搜索 | 支持 | 支持 | 当前使用公开搜索/歌词接口 |
-| QQ 音乐搜索 | 支持 | 支持 | 当前使用公开搜索/歌词接口 |
-| 酷狗、酷我 | 支持 | 暂未接入 | 预留 provider 扩展位置 |
-| 手动歌词搜索 | 支持 | 支持 | 候选列表、歌词预览、应用并保存 |
-| 搜索结果刷新 | 支持 | 支持 | 保留当前关键词和来源，重新请求列表 |
-| 自动匹配歌词 | 支持 | 支持 | 按标题/艺术家相似度选择候选 |
-| 组合标签 | 支持 | 支持 | 候选字段、歌词、封面和覆盖选项 |
-| 批量应用编辑器字段 | 支持 | 支持 | 多选后只应用实际修改的字段 |
-| 组合标签覆盖选项 | 支持 | 支持 | 保存在 `combined_tag_settings.json` |
-| 读取、保存、HTTP 请求日志 | 部分支持 | 支持 | 响应只记录 HTTP 状态行 |
-| 批量重命名模板 | 支持 | 暂未实现 | 属于后续功能 |
-| SQLite 历史/撤销 | 支持 | 暂未实现 | 属于后续功能 |
-| WinForms 原始 DPI/控件行为 | 支持 | 不等价 | Python 使用 Qt 布局 |
-
-## 4. 代码结构
+Double-click the repository-root launcher:
 
 ```text
-python_port/
-  app_qt.py       PySide6 主窗口、文件列表、编辑器和所有对话框
-  core.py         标签读写、在线搜索、歌词解析、日志和匹配算法
-  test_core.py    provider、歌词、标签和 HTTP 日志测试
-  test_ui.py      刷新列表和界面线程测试
-  test_combined_tag.py
-                  组合标签应用和覆盖选项测试
-  requirements.txt
-  README.md       Python 重制版快速说明
+Run-MusicTag-Python.bat
 ```
 
-`app.py` 是早期 Tk 原型，不作为启动入口。正式入口是 `app_qt.py`。
+Or run from PowerShell:
 
-### 4.1 `core.py`
-
-负责不依赖 Qt 的核心行为：
-
-- `Track` 保存标签、歌词、封面和加载状态
-- `load_track` / `save_track_tags` 负责 mutagen 的物理读写
-- `NetEaseProvider` / `QQProvider` 负责搜索和歌词
-- `search_sources` 并行请求多个来源
-- `score_hit` / `best_hit` 负责候选排序
-- `format_http_status_line` 生成 `HTTP/1.1 200 OK` 形式的响应日志
-- `download_bytes` 负责候选封面下载
-
-### 4.2 `app_qt.py`
-
-负责界面和交互：
-
-- 主窗口、工具栏、菜单和日志面板
-- 文件列表、过滤、多选和批量保存
-- 标签编辑器、歌词编辑器和封面预览
-- 歌词搜索窗口
-- 组合标签搜索窗口
-- 后台任务调度和线程安全日志队列
-
-## 5. 运行方式
-### 直接运行
-
-双击下载的exe直接运行
-
-## 6. 标签和保存语义
-
-- 编辑器中的修改先保存在当前 Python `Track` 对象中。
-- 切换选择时，编辑器修改会按当前行写回对应的 Python `Track` 对象，列表中显示“未保存”。
-- 点击“保存标签”才调用 `save_track_tags` 写入音频文件。
-- 组合标签和歌词搜索都只更新编辑器内容，不自动写文件。
-- 保存失败的文件保留未保存状态，成功文件清除状态。
-- 空字段在应用组合标签时不会覆盖编辑器原值，这与参考实现中“空搜索值不写入”的语义一致。
-
-## 7. 在线接口和日志
-
-当前只接入两个来源：
-
-- 网易云音乐：歌曲搜索、歌词、专辑年份和封面补充
-- QQ 音乐：歌曲搜索、歌词、专辑封面
-
-HTTP 日志的行为：
-
-- 记录请求方法、URL、请求头和请求体
-- 响应只记录状态行，例如：
-
-```text
-[HTTP] <- HTTP/1.1 200 OK
+```powershell
+.\.python_port\run.ps1
 ```
 
-- 不记录响应头、响应体、响应字节数或响应摘要
-- 程序内部仍读取响应体用于解析歌曲、歌词和封面
+Or directly:
 
-公共接口不是稳定 SDK，可能因平台限流、字段变化、Cookie、网络策略或接口下线而失效。失败不会关闭主程序，但可能使某一来源没有候选。
+```powershell
+.\.python_port\.venv\Scripts\python.exe .\.python_port\app_qt.py
+```
 
-## 8. 测试和验证
+## Test
 
 ```powershell
 .\.python_port\.venv\Scripts\python.exe .\.python_port\test_core.py
@@ -145,38 +60,17 @@ HTTP 日志的行为：
 .\.python_port\.venv\Scripts\python.exe .\.python_port\test_combined_tag.py
 ```
 
-当前验证覆盖：
+## Supported formats
 
-- MP3 标签、歌词和封面的物理 round trip
-- FLAC 标签、歌词和封面的实际文件 round trip（当前为手工执行）
-- 网易云/QQ 搜索响应解析
-- 歌词翻译时间合并
-- 组合标签候选表和字段应用
-- 覆盖选项持久化
-- 刷新列表重新发起请求
-- HTTP 状态行格式
+MP3, FLAC, M4A/MP4, OGG, Opus, WAV, AIFF, WMA/ASF.
 
-最近一次本地验证结果：核心 7 项、刷新界面 1 项、组合标签 3 项全部通过。歌词搜索和组合标签窗口的刷新按钮都复用同一套后台请求路径。联网验证应使用当前网络环境重新执行，不应把一次成功结果当作接口长期可用性的证明。
+## Intentional differences
 
-## 9. 已知差异
-
-- 不支持酷狗、酷我，当前只有网易云和 QQ 音乐。
-- 不具备批量重命名模板、SQLite 历史、完整撤销和原程序的全部批处理工具。
-- 不复制 TagLibSharp 的 ID3v2 版本选择细节。
-- 不保证与原 WinForms 程序一致的光标、焦点、DPI、列宽和虚拟列表行为。
-- 组合标签的歌词和封面是候选详情加载后异步填充的；在加载完成前应用，可能没有对应媒体。
-- 仅支持当前代码明确列出的音频扩展名，具体容器字段能力以 mutagen 为准。
-- 仓库没有重新分发原程序的全部资源和二进制依赖。
-
-## 10. 后续路线
-
-1. 增加更多 provider，并保持“单源失败不阻断其他来源”的行为。
-2. 增加批量重命名、历史记录和撤销。
-3. 补充组合标签的年份、封面和歌词加载状态提示。
-4. 增加真实音频 fixture 的自动化 FLAC、M4A、WAV round trip。
-5. 评估 PyInstaller 单文件打包和依赖冻结。
-6. 对关键在线接口增加录制响应 fixture，避免测试依赖实时网络。
-
-## 11. 版权和使用边界
-
-本重制版仅用于个人学习、研究和技术交流。原程序、第三方接口返回的数据、音乐文件及其元数据权利归各自权利人所有。使用在线搜索和标签写入前，应确认数据来源、服务条款和当地法律要求。
+- The UI is rebuilt with PySide6 and does not try to match WinForms pixel-for-pixel.
+- ID3 handling uses mutagen directly. It does not reproduce every TagLibSharp version-selection rule.
+- NetEase and QQ endpoints are public, unofficial interfaces and may change.
+- The port currently focuses on tags, lyrics, covers, batch saving and automatic matching. Rename templates, history, undo and advanced DPI behavior are not included yet.
+- Combined tag search applies candidate fields to the editor according to the
+  saved overwrite options; the file is written only when “保存标签” is used.
+- NetEase album details are used to fill a missing release year and cover when
+  the search result does not carry them.
