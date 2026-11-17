@@ -1,5 +1,7 @@
 # MusicTag Python
 
+简体中文版：[README.zh-CN.md](README.zh-CN.md)
+
 This is a lightweight Python port of the core MusicTag workflow:
 
 - read and edit common audio tags
@@ -28,8 +30,8 @@ The repository environment was created with Python 3.13.
 ## Install
 
 ```powershell
-py -m venv .\.python_port\.venv
-.\.python_port\.venv\Scripts\python.exe -m pip install -r .\.python_port\requirements.txt
+py -m venv .\python-remake\.venv
+.\python-remake\.venv\Scripts\python.exe -m pip install -r .\python-remake\requirements.txt
 ```
 
 ## Run
@@ -43,21 +45,21 @@ Run-MusicTag-Python.bat
 Or run from PowerShell:
 
 ```powershell
-.\.python_port\run.ps1
+.\python-remake\run.ps1
 ```
 
 Or directly:
 
 ```powershell
-.\.python_port\.venv\Scripts\python.exe .\.python_port\app_qt.py
+.\python-remake\.venv\Scripts\python.exe .\python-remake\app_qt.py
 ```
 
 ## Test
 
 ```powershell
-.\.python_port\.venv\Scripts\python.exe .\.python_port\test_core.py
-.\.python_port\.venv\Scripts\python.exe .\.python_port\test_ui.py
-.\.python_port\.venv\Scripts\python.exe .\.python_port\test_combined_tag.py
+.\python-remake\.venv\Scripts\python.exe .\python-remake\test_core.py
+.\python-remake\.venv\Scripts\python.exe .\python-remake\test_ui.py
+.\python-remake\.venv\Scripts\python.exe .\python-remake\test_combined_tag.py
 ```
 
 ## Supported formats
